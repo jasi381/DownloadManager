@@ -5,14 +5,18 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,8 +44,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    DownloadSection3(this
-                    )
+                    DownloadSection33(this)
 
                 }
             }
@@ -52,40 +55,20 @@ class MainActivity : ComponentActivity() {
 
 
 
-fun downloadFile(
-    url: String,
-    context: Context
-): Long {
-
-    val downloadManager = context.getSystemService(DownloadManager::class.java)
-
-    val lastPeriodIndex = url.lastIndexOf('.')
-
-    if (lastPeriodIndex != -1 && lastPeriodIndex < url.length - 1) {
-        val extractedText = url.substring(lastPeriodIndex + 1)
-        Log.d("URL", "Extracted text: $extractedText")
-    } else {
-        println("No extension found in URL")
-    }
-    val request = DownloadManager
-        .Request(url.toUri())
-        .setMimeType("noob.mp4")
-        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        .setTitle("video.mp4")
-        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "video.mp4")
-
-    return downloadManager.enqueue(request)
-
-
-}
-
-
-
-
 @Composable
-fun DownloadSection3(context: Context) {
+fun DownloadSection33(context: Context) {
     var downloadId by remember { mutableStateOf(0L) }
     var downloadProgress by remember { mutableStateOf(0.0f) }
+    var showProgressBar by remember {
+        mutableStateOf(
+            false
+        )
+    }
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = downloadProgress,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec, label = ""
+    )
 
     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
@@ -94,19 +77,33 @@ fun DownloadSection3(context: Context) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LinearProgressIndicator(progress = downloadProgress, color = Color.Red, trackColor = Color.Yellow)
+        LinearProgressIndicator(progress = animatedProgress, color = Color.Red, trackColor = Color.Yellow)
 
         Button(
             onClick = {
-                val request = DownloadManager.Request("https://jsoncompare.org/LearningContainer/SampleFiles/Video/MP4/Sample-Video-File-For-Testing.mp4".toUri())
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "video.mp4")
+                try{
+                    val request = DownloadManager.Request("https://jsoncompare.org/LearningContainer/SampleFiles/Video/MP4/Sample-Video-File-For-Testing.mp4".toUri())
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "video.mp4")
 
-                downloadId = downloadManager.enqueue(request)
-                Log.d("TAGH", "DownloadSection:  {$downloadProgress}")
+                    downloadId = downloadManager.enqueue(request)
+                    Log.d("TAGH", "DownloadSection:  {$downloadProgress}")
+                }catch (e:Exception){
+                    Toast.makeText(context, e.message.toString(), Toast.LENGTH_SHORT).show()
+                    Log.d("TAGH", "DownloadSection:  ${e.message.toString()}")
+                }
+
             }
         ) {
             Text(text = "Download")
+        }
+
+        if (downloadId == 1L) {
+            Text(text = "Download Completed")
+        }
+
+        if(showProgressBar){
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     }
     LaunchedEffect(downloadId) {
@@ -124,14 +121,17 @@ fun DownloadSection3(context: Context) {
                     val status = cursor.getInt(statusIndex)
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         downloadId = 1L
+                        showProgressBar = false
                         downloadProgress = 1.0f
                     } else if (status == DownloadManager.STATUS_FAILED) {
                         downloadId = 0L
                         downloadProgress = 0.0f
+                        showProgressBar= false
                     } else {
                         val bytesDownloaded = cursor.getLong(bytesDownloadedIndex)
                         val totalBytes = cursor.getLong(totalBytesIndex)
                         if (totalBytes > 0) {
+                            showProgressBar = true
                             downloadProgress = bytesDownloaded.toFloat() / totalBytes.toFloat()
                         }
                     }
