@@ -148,6 +148,17 @@ fun DownloadSection33(context: Context) {
             ) {
                 Text(text = "Cancel")
             }
+//            // a button for pause and resume THE DOWNLOAD
+//            Button(
+//                onClick = {
+//                    scope.launch {
+//                        downloadManager.openDownloadedFile(downloadId2.value)
+//                    }
+//                },
+//                enabled = isFileDownloaded.value
+//            ) {
+//                Text(text = "Open")
+//            }
 
         }
 
