@@ -78,31 +78,7 @@ class DownloadManagerClass(
         return combinedStatus
     }
 
-    fun getDownloadProgress(downloadIds: List<Long>): Int {
-        var totalDownloadedBytes = 0L
-        var totalTotalBytes = 0L
 
-        for (downloadId in downloadIds) {
-            val query = DownloadManager.Query().setFilterById(downloadId)
-            val cursor = downloadManager.query(query)
-            val downloadedBytesIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-            val totalBytesIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
-
-            if (cursor.moveToFirst()) {
-                if (downloadedBytesIndex != -1 && totalBytesIndex != -1) {
-                    totalDownloadedBytes += cursor.getLong(downloadedBytesIndex)
-                    totalTotalBytes += cursor.getLong(totalBytesIndex)
-                }
-            }
-            cursor.close()
-        }
-
-        return if (totalTotalBytes > 0) {
-            ((totalDownloadedBytes * 100L) / totalTotalBytes).toInt()
-        } else {
-            0
-        }
-    }
 
     fun cancelDownloads(downloadIds: List<Long>) {
         for (downloadId in downloadIds) {
@@ -151,6 +127,33 @@ class DownloadManagerClass(
 
         return totalSizeMB
     }
+
+    fun getDownloadProgress(downloadIds: List<Long>): Int {
+        var totalDownloadedBytes = 0L
+        var totalTotalBytes = 0L
+
+        for (downloadId in downloadIds) {
+            val query = DownloadManager.Query().setFilterById(downloadId)
+            val cursor = downloadManager.query(query)
+            val downloadedBytesIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+            val totalBytesIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+
+            if (cursor.moveToFirst()) {
+                if (downloadedBytesIndex != -1 && totalBytesIndex != -1) {
+                    totalDownloadedBytes += cursor.getLong(downloadedBytesIndex)
+                    totalTotalBytes += cursor.getLong(totalBytesIndex)
+                }
+            }
+            cursor.close()
+        }
+
+        return if (totalTotalBytes > 0) {
+            ((totalDownloadedBytes * 100L) / totalTotalBytes).toInt()
+        } else {
+            0
+        }
+    }
+
 
 
 

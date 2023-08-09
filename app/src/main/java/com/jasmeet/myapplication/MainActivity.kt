@@ -212,7 +212,7 @@ fun DownloadSection3() {
     val scope = rememberCoroutineScope()
 
     val downloadId2 = remember { mutableStateOf(emptyList<Long>()) }
-    val isFileDownloaded = remember { mutableStateOf(false) }
+    val isAllFilesDownloaded = remember { mutableStateOf(false) }
 
 
     val downloadManagerClass = remember { DownloadManagerClass(context) }
@@ -267,7 +267,6 @@ fun DownloadSection3() {
                         }
                     }
                 },
-                enabled = !isFileDownloaded.value
             ) {
                 Text(text = "Cancel")
             }
@@ -275,7 +274,7 @@ fun DownloadSection3() {
 
         if (downloadId2.value.isNotEmpty()) {
             Text(text = "Download Completed")
-            isFileDownloaded.value = true
+            isAllFilesDownloaded.value = true
         }
         if (showProgressBar.value) {
             CircularProgressIndicator(
@@ -292,32 +291,32 @@ fun DownloadSection3() {
 
     LaunchedEffect(downloadId2.value) {
         while (downloadId2.value.isNotEmpty()) {
-            for (downloadId in downloadId2.value) {
-                when (downloadManagerClass.getCombinedDownloadStatus(listOf(downloadId))) {
-                    DownloadManager.STATUS_SUCCESSFUL -> {
-                        showProgressBar.value = false
-                        downloadedBytes.value = downloadManagerClass.getTotalDownloadedBytes(listOf(downloadId))
-                        downloadProgress.value = 1.0f
-                        Utils.showToast(context, "Download Completed")
-                        downloadId2.value = emptyList()
-                    }
-                    DownloadManager.STATUS_FAILED -> {
-                        downloadProgress.value = 0.0f
-                        showProgressBar.value = false
-                        Utils.showToast(context, "Download Failed")
-                        downloadId2.value = emptyList()
-                    }
-                    else -> {
-                        downloadProgress.value = downloadManagerClass.getDownloadProgress(listOf(downloadId)).toFloat()
-                        if (downloadProgress.value > 0) {
-                            showProgressBar.value = true
-                            downloadProgress.value = downloadProgress.value / 100f
-                            fileSizeMB.value = downloadManagerClass.getTotalFilesSizeMB(listOf(downloadId))
-                            downloadedBytes.value = downloadManagerClass.getTotalDownloadedBytes(listOf(downloadId))
-                        }
+            isAllFilesDownloaded.value = false
+            when (downloadManagerClass.getCombinedDownloadStatus(downloadId2.value)) {
+                DownloadManager.STATUS_SUCCESSFUL -> {
+                    showProgressBar.value = false
+                    downloadedBytes.value = downloadManagerClass.getTotalDownloadedBytes(downloadId2.value)
+                    downloadProgress.value = 1.0f
+                    Utils.showToast(context, "Download Completed")
+                    downloadId2.value = emptyList()
+                }
+                DownloadManager.STATUS_FAILED -> {
+                    downloadProgress.value = 0.0f
+                    showProgressBar.value = false
+                    Utils.showToast(context, "Download Failed")
+                    downloadId2.value = emptyList()
+                }
+                else -> {
+                    downloadProgress.value = downloadManagerClass.getDownloadProgress(downloadId2.value).toFloat()
+                    if (downloadProgress.value > 0) {
+                        showProgressBar.value = true
+                        downloadProgress.value = downloadProgress.value / 100f
+                        fileSizeMB.value = downloadManagerClass.getTotalFilesSizeMB(downloadId2.value)
+                        downloadedBytes.value = downloadManagerClass.getTotalDownloadedBytes(downloadId2.value)
                     }
                 }
             }
+
             delay(50) // Delay to avoid blocking the thread
         }
     }
