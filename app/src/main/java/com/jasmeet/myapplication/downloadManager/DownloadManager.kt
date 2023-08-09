@@ -78,14 +78,11 @@ class DownloadManagerClass(
         return combinedStatus
     }
 
-
-
     fun cancelDownloads(downloadIds: List<Long>) {
         for (downloadId in downloadIds) {
             downloadManager.remove(downloadId)
         }
     }
-
 
     fun getTotalDownloadedBytes(downloadIds: List<Long>): Long {
         var totalDownloadedBytes = 0L
@@ -107,7 +104,6 @@ class DownloadManagerClass(
         return totalDownloadedBytes
     }
 
-
     fun getTotalFilesSizeMB(downloadIds: List<Long>): Long {
         var totalSizeMB = 0L
 
@@ -119,7 +115,7 @@ class DownloadManagerClass(
             if (cursor.moveToFirst()) {
                 if (totalBytesIndex != -1) {
                     val totalBytes = cursor.getLong(totalBytesIndex)
-                    totalSizeMB += totalBytes / (1024 * 1024)
+                    totalSizeMB += totalBytes
                 }
             }
             cursor.close()
@@ -128,7 +124,7 @@ class DownloadManagerClass(
         return totalSizeMB
     }
 
-    fun getDownloadProgress(downloadIds: List<Long>): Int {
+    fun getDownloadProgress(downloadIds: List<Long>): Long {
         var totalDownloadedBytes = 0L
         var totalTotalBytes = 0L
 
@@ -148,14 +144,10 @@ class DownloadManagerClass(
         }
 
         return if (totalTotalBytes > 0) {
-            ((totalDownloadedBytes * 100L) / totalTotalBytes).toInt()
+            ((totalDownloadedBytes * 100L) / totalTotalBytes)
         } else {
             0
         }
     }
-
-
-
-
 
 }

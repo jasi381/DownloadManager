@@ -241,6 +241,7 @@ fun DownloadSection3() {
                             fileNames,
                             false
                         )
+                        showProgressBar.value = true
                     }
                 }
             ) {
@@ -272,7 +273,7 @@ fun DownloadSection3() {
             }
         }
 
-        if (downloadId2.value.isNotEmpty()) {
+        if (!showProgressBar.value) {
             Text(text = "Download Completed")
             isAllFilesDownloaded.value = true
         }
@@ -283,7 +284,8 @@ fun DownloadSection3() {
         }
         if (downloadedBytes.value > 0 && fileSizeMB.value > 0) {
             val downloadedMB = downloadedBytes.value / (1024 * 1024)
-            val text = "${downloadedMB}MB/${fileSizeMB.value}MB"
+            val totalSize = fileSizeMB.value / (1024 * 1024)
+            val text = "${downloadedMB}MB/${totalSize}MB"
             Text(text = text)
         }
 
