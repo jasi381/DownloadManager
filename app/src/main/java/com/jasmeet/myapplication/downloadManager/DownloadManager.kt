@@ -21,15 +21,16 @@ class DownloadManagerClass(
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
         if (downloadOnlyOne && downloadUrls.isNotEmpty()) {
+            val fileExtension = downloadUrls[0].substringAfterLast(".")
             val request = DownloadManager.Request(downloadUrls[0].toUri())
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                 .setAllowedOverRoaming(true)
                 .setTitle("Downloading File")
                 .setDescription("Downloading a file from the internet.")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(
-                    Environment.DIRECTORY_DOWNLOADS,
-                    "${fileNames[0]}.mp4"
+                .setDestinationInExternalFilesDir(
+                    context,
+                    "jasmeet",
+                    "${fileNames[0]}.${fileExtension}"
                 )
 
 
@@ -37,15 +38,14 @@ class DownloadManagerClass(
             downloadIds.add(downloadId)
         } else {
             for (i in downloadUrls.indices) {
+                val fileExtension = downloadUrls[i].substringAfterLast(".")
                 val request = DownloadManager.Request(downloadUrls[i].toUri())
                     .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                     .setAllowedOverRoaming(true)
-                    .setTitle("Downloading File")
-                    .setDescription("Downloading a file from the internet.")
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationInExternalPublicDir(
-                        Environment.DIRECTORY_DOWNLOADS,
-                        "${fileNames[i]}.mp4"
+                    .setDestinationInExternalFilesDir(
+                        context,
+                       "jasmeet",
+                        "${fileNames[i]}.${fileExtension}"
                     )
 
                 val downloadId = downloadManager.enqueue(request)
